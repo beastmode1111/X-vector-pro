@@ -4,7 +4,28 @@ import time
 from datetime import datetime
 from utils.setup_logger import create_logger
 import logging
+# core/logger.py
+import logging
+import os
+from logging.handlers import RotatingFileHandler
 
+LOG_DIR = os.getenv("XVECTOR_LOG_DIR", "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+LOG_FILE = os.path.join(LOG_DIR, "cortex.log")
+
+def get_logger(name: str = "cortex"):
+    logger = logging.getLogger(name)
+    if logger.handlers:
+        return logger
+    logger.setLevel(logging.INFO)
+    fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+    sh = logging.StreamHandler()
+    sh.setFormatter(fmt)
+    logger.addHandler(sh)
+    rh = RotatingFileHandler(LOG_FILE, maxBytes=10*1024*1024, backupCount=7)
+    rh.setFormatter(fmt)
+    logger.addHandler(rh)
+    return logger
 LOG_DIR = os.path.join(os.path.dirname(__file__), '..', 'logs')
 os.makedirs(LOG_DIR, exist_ok=True)
 LOG_FILE = os.path.join(LOG_DIR, 'xvectorpro.log')
